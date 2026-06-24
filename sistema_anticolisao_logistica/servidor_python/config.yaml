@@ -1,3 +1,20 @@
 # Central configuration for sistema_anticolisao_logistica
 # (IPs, thresholds, scales)
 
+wifi:
+  ssid: "your_ssid"
+  password: "your_password"
+
+mqtt:
+  broker: "192.168.1.100"
+  port: 1883
+  topic_alert: "veiculo/alerta"
+  topic_heartbeat: "veiculo/heartbeat"
+
+esp32_cam:
+  ip: "192.168.1.101"
+  stream_port: 81
+  mjpeg_path: "/stream"
+  username: ""
+  password: ""
+
