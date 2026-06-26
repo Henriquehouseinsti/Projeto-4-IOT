@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "WiFi.h"
 #include "WebServer.h"
 #include "esp_camera.h"
 #include "config.h"
