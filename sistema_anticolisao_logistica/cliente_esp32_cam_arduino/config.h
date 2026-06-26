@@ -9,8 +9,8 @@
 #define HTTP_PASSWORD ""
 
 // IP estático da câmera — manter sincronizado com config.yaml do servidor Python
-#define CAM_IP      10, 131, 184, 108
-#define CAM_GATEWAY 10, 131, 184, 226
+#define CAM_IP      10, 10, 115, 108
+#define CAM_GATEWAY 10, 10, 115, 1
 #define CAM_SUBNET  255, 255, 255, 0
 
 #endif // CAMERA_CONFIG_H
