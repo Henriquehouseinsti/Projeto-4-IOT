@@ -2,12 +2,12 @@
 #define CONFIG_H
 
 // --- Credenciais de Rede Wi-Fi ---
-#define WIFI_SSID     "GD03"
-#define WIFI_PASSWORD "Gd#03!@8"
+#define WIFI_SSID     "Henrique"
+#define WIFI_PASSWORD "12345678"
 
 // --- Configurações MQTT ---
 // IP do PC rodando o servidor Python (verificar com ipconfig)
-#define MQTT_BROKER "10.10.115.140"
+#define MQTT_BROKER "192.168.137.164"
 #define MQTT_PORT   1883
 
 // --- Tópicos MQTT ---

@@ -27,7 +27,7 @@ class MQTTManager:
         self.client.on_disconnect = self._on_disconnect
         
         # --- Mecanismo de Watchdog para o YOLO ---
-        self._last_yolo_inference_time = time.time()
+        self._last_yolo_inference_time = None  # None = sistema ainda inicializando, watchdog inativo
         self._watchdog_timeout = 1.0
         
         # Controle da thread do Heartbeat
@@ -36,7 +36,7 @@ class MQTTManager:
         self.is_connected = False # Flag interna para monitorar o status real da rede
 
     def touch_yolo(self):
-        """Alimenta o cão de guarda da IA a cada frame processado"""
+        """Alimenta o watchdog da IA a cada frame processado. Primeira chamada ativa o watchdog."""
         self._last_yolo_inference_time = time.time()
 
     def _on_connect(self, client, userdata, flags, rc):
@@ -57,7 +57,6 @@ class MQTTManager:
         # Garante que só existirá uma thread de heartbeat rodando por vez
         if self._heartbeat_thread is None or not self._heartbeat_thread.is_alive():
             self._stop_heartbeat.clear()
-            self._last_yolo_inference_time = time.time() 
             self._heartbeat_thread = threading.Thread(target=self._heartbeat_worker, daemon=True)
             self._heartbeat_thread.start()
             logging.info("Thread de Heartbeat (200ms) com Watchdog iniciada.")
@@ -66,10 +65,13 @@ class MQTTManager:
         """Thread assíncrona desacoplada do tempo de processamento visual"""
         while not self._stop_heartbeat.is_set():
             current_time = time.time()
-            
-            # Verifica a integridade do loop do YOLO
-            yolo_alive = (current_time - self._last_yolo_inference_time) < self._watchdog_timeout
-            
+
+            # Watchdog só ativa após touch_yolo() ser chamado pela primeira vez
+            if self._last_yolo_inference_time is None:
+                yolo_alive = True  # sistema ainda inicializando — heartbeat vai normalmente
+            else:
+                yolo_alive = (current_time - self._last_yolo_inference_time) < self._watchdog_timeout
+
             # Só envia o pacote se a IA estiver viva E se o cliente estiver conectado na rede
             if yolo_alive and self.is_connected:
                 try:
@@ -78,7 +80,7 @@ class MQTTManager:
                     logging.error(f"Erro ao enviar Heartbeat: {e}")
             elif not yolo_alive:
                 logging.error("[WATCHDOG] O loop do YOLO travou! Heartbeat suspenso para alertar o ESP32.")
-            
+
             # Aguarda estritamente 200ms de forma segura
             self._stop_heartbeat.wait(timeout=0.2)
 

@@ -1,6 +1,6 @@
 import os
-import sys
 import logging
+import numpy as np
 from ultralytics import YOLO
 
 # Configuração de logs
@@ -19,21 +19,19 @@ class PerceptionEngine:
 
     def load_model(self):
         """Carrega os pesos do YOLO na memória e força uma inferência de aquecimento (warmup)"""
-        if not os.path.exists(self.model_path):
-            logging.error(f"[PERCEPTION] Arquivo de pesos não encontrado em: {self.model_path}")
+        if not os.path.exists(self.model_path) or os.path.getsize(self.model_path) == 0:
+            logging.warning(f"[PERCEPTION] Arquivo de modelo ausente ou vazio: {self.model_path}")
             return False
-            
+
         try:
             logging.info(f"[PERCEPTION] Carregando modelo YOLOv11 de {self.model_path} no dispositivo '{self.device}'...")
             self.model = YOLO(self.model_path)
-            
-            # Garante que o warmup encontre um arquivo válido ou usa um tensor vazio para aquecimento
             logging.info("[PERCEPTION] Executando warmup da rede neural...")
-            self.model.predict(source=self.model_path, device=self.device, imgsz=640, verbose=False)
+            self.model(np.zeros((640, 640, 3), dtype=np.uint8), verbose=False)
             logging.info("[PERCEPTION] Modelo YOLOv11 carregado e aquecido com sucesso.")
             return True
         except Exception as e:
-            logging.error(f"[PERCEPTION] Falha crítica ao inicializar o modelo: {e}")
+            logging.error(f"[PERCEPTION] Falha ao inicializar o modelo: {e}")
             return False
 
     def process_frame(self, frame, mqtt_manager=None):
@@ -46,10 +44,6 @@ class PerceptionEngine:
 
         if frame is None:
             return []
-
-        # --- ALIMENTA O WATCHDOG DO HEARTBEAT ---
-        if mqtt_manager:
-            mqtt_manager.touch_yolo()
 
         tracked_objects = []
 
@@ -64,6 +58,10 @@ class PerceptionEngine:
                 tracker="bytetrack.yaml",
                 verbose=False
             )
+
+            # --- ALIMENTA O WATCHDOG DO HEARTBEAT (só após inferência concluir) ---
+            if mqtt_manager:
+                mqtt_manager.touch_yolo()
 
             # Validação defensiva robusta para evitar IndexError se a lista for vazia
             if results is None or len(results) == 0:

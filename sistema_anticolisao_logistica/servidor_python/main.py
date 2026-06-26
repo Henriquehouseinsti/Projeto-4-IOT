@@ -31,7 +31,7 @@ def main():
     # 1. LEITURA DINÂMICA DO ARQUIVO DE CONFIGURAÇÃO (config.yaml)
     try:
         logging.info("Carregando parâmetros do arquivo config.yaml...")
-        with open("config.yaml", "r") as f:
+        with open("config.yaml", "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
     except Exception as e:
         logging.error(f"Falha crítica ao ler o arquivo config.yaml: {e}")
@@ -84,12 +84,10 @@ def main():
     mqtt_manager.conectar()
     data_logger.start()  # Ativa a thread de gravação assíncrona em disco
     
-    if not perception.load_model():
-        logging.error("Falha crítica ao carregar modelo de IA. Encerrando orquestrador.")
-        mqtt_manager.desconectar()
-        data_logger.stop()
-        sys.exit(1)
-        
+    yolo_enabled = perception.load_model()
+    if not yolo_enabled:
+        logging.warning("Modelo YOLO não disponível. Rodando em modo câmera (sem detecção).")
+
     if not camera.start():
         logging.error("Falha crítica ao iniciar o fluxo de vídeo. Encerrando orquestrador.")
         mqtt_manager.desconectar()
@@ -122,14 +120,16 @@ def main():
                 time.sleep(0.01)
                 continue
 
-            # Passo 2: Executa IA (YOLOv11) e amarra IDs (ByteTrack)
-            detections = perception.process_frame(frame, mqtt_manager=mqtt_manager)
-            
-            # Passo 3: Converte pixels para metros (Homografia) e aplica Filtro de Kalman com dt corrigido
-            enriched_objects = kinematics.update_kinematics(detections)
-            
-            # Passo 4: Projeta trajetórias futuras no plano cartesiano (Shapely) e avalia colisões (TTC)
-            collisions = risk_engine.calculate_collisions(enriched_objects, mqtt_manager=mqtt_manager)
+            # Passo 2-4: Pipeline de IA (apenas se o modelo estiver disponível)
+            if yolo_enabled:
+                detections = perception.process_frame(frame, mqtt_manager=mqtt_manager)
+                enriched_objects = kinematics.update_kinematics(detections)
+                collisions = risk_engine.calculate_collisions(enriched_objects, mqtt_manager=mqtt_manager)
+            else:
+                detections = []
+                enriched_objects = []
+                collisions = []
+                mqtt_manager.touch_yolo()  # mantém heartbeat ativo para o ESP32 Atuador
 
             # --- Passo 5: REGISTRO DE DADOS ASSÍNCRONO (.jsonl) ---
             for obj in enriched_objects:
