@@ -19,7 +19,7 @@ mqtt:
 
 # 2. Fonte de Captura de Vídeo (Módulo core/camera_stream)
 camera:
-  source: "http://192.168.1.108:81/stream"  # IP estático da ESP32-CAM (definido em cliente_esp32_cam/include/config.h)
+  source: "http://10.131.184.108:81/stream"  # IP estático da ESP32-CAM (definido em cliente_esp32_cam/include/config.h)
   max_reconnect_tries: 10             # Tentativas automáticas de reconexão se a rede cair
   reconnect_delay: 1.0                # Tempo de espera (em segundos) entre tentativas
 

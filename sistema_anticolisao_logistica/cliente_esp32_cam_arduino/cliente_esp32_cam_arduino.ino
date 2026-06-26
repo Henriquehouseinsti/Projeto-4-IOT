@@ -56,6 +56,8 @@ void setup() {
   Serial.println();
   Serial.print("Wi-Fi conectado! Acesse o stream em: http://");
   Serial.print(WiFi.localIP());
+  Serial.print(":");
+  Serial.print(CAMERA_STREAM_PORT);
   Serial.println("/stream");
 
   startCameraServer();
