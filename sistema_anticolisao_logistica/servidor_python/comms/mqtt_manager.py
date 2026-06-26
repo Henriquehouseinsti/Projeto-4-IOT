@@ -72,13 +72,8 @@ class MQTTManager:
             
             # Só envia o pacote se a IA estiver viva E se o cliente estiver conectado na rede
             if yolo_alive and self.is_connected:
-                payload = {
-                    "client_id": self.client_id,
-                    "status": "ok",
-                    "timestamp": current_time
-                }
                 try:
-                    self.client.publish(self.topic_heartbeat, json.dumps(payload), qos=0)
+                    self.client.publish(self.topic_heartbeat, "ok", qos=0)
                 except Exception as e:
                     logging.error(f"Erro ao enviar Heartbeat: {e}")
             elif not yolo_alive:
@@ -112,6 +107,17 @@ class MQTTManager:
             logging.info(f"Alerta publicado com sucesso: {payload}")
         except Exception as e:
             logging.error(f"Falha ao publicar alerta: {e}")
+
+    def enviar_alerta_esp32(self, nivel: str):
+        """Publica string simples para o ESP32 Atuador interpretar diretamente.
+        nivel: 'RISCO_VERMELHO', 'RISCO_AMARELO' ou 'SEGURO'
+        """
+        if not self.is_connected:
+            return
+        try:
+            self.client.publish(self.topic_alerts, nivel, qos=1)
+        except Exception as e:
+            logging.error(f"Falha ao publicar alerta ESP32: {e}")
 
     def desconectar(self):
         logging.info("Encerrando conexões do MQTT Manager...")

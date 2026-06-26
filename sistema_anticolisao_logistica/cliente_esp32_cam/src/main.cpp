@@ -43,6 +43,11 @@ void setup() {
     return;
   }
 
+  IPAddress ip(CAM_IP);
+  IPAddress gateway(CAM_GATEWAY);
+  IPAddress subnet(CAM_SUBNET);
+  WiFi.config(ip, gateway, subnet);
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {

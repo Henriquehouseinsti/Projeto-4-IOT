@@ -14,12 +14,12 @@ mqtt:
   password: null                      # Senha (se houver)
   keepalive: 60
   topics:
-    alerts: "telemetria/colisao"      # Tópico para publicar alertas críticos de batida (QoS 1)
-    heartbeat: "telemetria/heartbeat" # Tópico para publicar o "ok" a cada 200ms (QoS 0)
+    alerts: "logistica/alerta"        # Tópico para publicar alertas críticos de batida (QoS 1)
+    heartbeat: "logistica/heartbeat"  # Tópico para publicar o "ok" a cada 200ms (QoS 0)
 
 # 2. Fonte de Captura de Vídeo (Módulo core/camera_stream)
 camera:
-  source: 0                           # 0 para webcam local, ou URL RTSP (ex: "rtsp://192.168.1.100:554/stream1")
+  source: "http://192.168.1.108:81/stream"  # IP estático da ESP32-CAM (definido em cliente_esp32_cam/include/config.h)
   max_reconnect_tries: 10             # Tentativas automáticas de reconexão se a rede cair
   reconnect_delay: 1.0                # Tempo de espera (em segundos) entre tentativas
 

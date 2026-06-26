@@ -117,6 +117,8 @@ class RiskEngine:
                                 ttc=ttc_detected,
                                 gravidade=gravidade
                             )
+                            nivel_esp32 = "RISCO_VERMELHO" if gravidade == "CRITICA" else "RISCO_AMARELO"
+                            mqtt_manager.enviar_alerta_esp32(nivel_esp32)
                             self._last_alert_sent[pair_key] = current_time
                     else:
                         logging.info(f"[RISK ENGINE] Alerta para o par {pair_key} suprimido por histerese de rede.")
