@@ -1,0 +1,13 @@
+names:
+- carro
+nc: 1
+roboflow:
+  license: Private
+  project: my-first-project-g1ior
+  url: https://app.roboflow.com/franciscos-workspace-tw6uh/my-first-project-g1ior/1
+  version: 1
+  workspace: franciscos-workspace-tw6uh
+train: C:\Users\Aluno\Projeto-4-IOT\sistema_anticolisao_logistica\servidor_python\dataset\My
+  First Project.v1i.yolov11\train\images
+val: C:\Users\Aluno\Projeto-4-IOT\sistema_anticolisao_logistica\servidor_python\dataset\My
+  First Project.v1i.yolov11\valid\images

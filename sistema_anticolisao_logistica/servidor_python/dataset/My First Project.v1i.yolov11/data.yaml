@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['carro']
+
+roboflow:
+  workspace: franciscos-workspace-tw6uh
+  project: my-first-project-g1ior
+  version: 1
+  license: Private
+  url: https://app.roboflow.com/franciscos-workspace-tw6uh/my-first-project-g1ior/1
